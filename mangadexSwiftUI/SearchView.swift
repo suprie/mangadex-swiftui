@@ -25,8 +25,10 @@ struct SearchView: View {
             }
         }
         .searchable(text: $searchText)
-        .onSubmit(of: .search){
-            viewModel.load(with: searchText)
+        .onSubmit(of: .search) {
+            Task {
+                await viewModel.load(with: searchText)
+            }
         }
 
     }
@@ -36,16 +38,23 @@ struct MangaRow: View {
     let manga: Manga
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(manga.title)
-                .fontWeight(.bold)
-                .padding(.bottom, 5)
-            Text(LocalizedStringKey(manga.mangaDescription))
-                .font(.caption)
-                .fontWeight(.light)
-                .foregroundStyle(.gray)
+        HStack(alignment: .top) {
+            AsyncImage(url: manga.coverArtURL, content: { image in
+                image.resizable().frame(maxWidth:100, maxHeight: 100)
+            }, placeholder: {
+                ProgressView()
+            })
+            VStack(alignment: .leading, spacing: 10) {
+                Text(manga.title)
+                    .fontWeight(.bold)
+                    .padding(.bottom, 5)
+                Text(LocalizedStringKey(manga.mangaDescription))
+                    .font(.caption)
+                    .fontWeight(.light)
+                    .foregroundStyle(.gray)
+            }
+            .padding(.bottom, 10)
         }
-        .padding(.bottom, 10)
     }
 }
 

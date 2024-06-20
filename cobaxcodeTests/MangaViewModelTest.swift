@@ -6,17 +6,16 @@
 //
 
 import Testing
+import XCTest
 @testable import MangaDex_SwiftUI
 
+@MainActor
 struct MangaViewModelTest {
 
     private let sut: MangaViewModel = MangaViewModel()
 
-    @Test func load() {
-        sut.load(with: "One")
-
-        _ = sut.$mangas.dropFirst().sink(receiveValue: { mangas in
-            #expect(sut.mangas.count > 0)
-        })
+    @Test func load() async {
+        await sut.load(with: "One")
+        #expect(sut.mangas.count > 0)
     }
 }

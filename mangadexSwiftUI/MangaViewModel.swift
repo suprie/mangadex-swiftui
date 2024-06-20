@@ -8,49 +8,59 @@
 import Foundation
 import Combine
 
+struct CoverArtHelper {
+    static func constructCoverArtURL(_ mangaId: String, _ coverArtFilename: String?) -> String? {
+        guard let coverArtFilename = coverArtFilename else {
+            return nil
+        }
 
-struct MangaResponse: Decodable {
-    let data: [MangaData]
-}
-
-struct MangaData: Decodable {
-    let type: String
-    let attributes: MangaAttributes
-}
-
-struct MangaAttributes: Decodable {
-    let title: [String: String]
-    let description: [String: String]
+        let baseURL = "https://uploads.mangadex.org/covers"
+        return "\(baseURL)/\(mangaId)/\(coverArtFilename).512.jpg"
+    }
 }
 
 struct Manga {
     let id = UUID()
+    private let mangaId: String
     let title: String
     let mangaDescription: String
+    private let coverArtFilename: String?
+
+    var coverArtURL: URL? {
+        return URL(string: CoverArtHelper.constructCoverArtURL(mangaId, coverArtFilename) ?? "")
+    }
+
+    init(title: String, mangaId: String, mangaDescription: String, coverArtFilename: String?) {
+        self.title = title
+        self.mangaId = mangaId
+        self.mangaDescription = mangaDescription
+        self.coverArtFilename = coverArtFilename
+    }
 }
 
-
+@MainActor
 final class MangaViewModel: ObservableObject {
     @Published var mangas: [Manga] = []
 
-    func load(with searchString: String)  {
-        _ = Task { @MainActor in
-            let manga = try await loadManga(with: searchString)
-            self.mangas = manga
-        }
+    private var searchAPI = SearchMangaAPI()
+
+    func load(with searchString: String) async {
+        let manga = try? await self.loadManga(with: searchString)
+        self.mangas = manga ?? []
     }
 
     private func loadManga(with title: String) async throws -> [Manga] {
-        guard let url = URL(string: "https://api.mangadex.org/manga?title=\(title)&includes[]=cover_art") else {
-            fatalError()
+        do {
+            let decoded = try await searchAPI.search(by: title)
+            return decoded.data.map {
+                Manga(title: $0.attributes.title["en"]!,
+                      mangaId: $0.id,
+                      mangaDescription: $0.attributes.description["en"] ?? "",
+                      coverArtFilename: $0.relationships.coverArt?.fileName) }
+        } catch {
+            print("Error: \(error)")
+            return []
         }
 
-        let urlRequest = URLRequest(url: url)
-        let (data, _) = try await URLSession.shared.data(for: urlRequest)
-        let decoder = JSONDecoder()
-        let decoded = try decoder.decode(MangaResponse.self, from: data)
-        return decoded.data.map {
-                    Manga(title: $0.attributes.title["en"]!,
-                          mangaDescription: $0.attributes.description["en"] ?? "") }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct mangadexSwiftUI: App {
+struct MangadexSwiftUI: App {
     var body: some Scene {
         WindowGroup {
             SearchView()
