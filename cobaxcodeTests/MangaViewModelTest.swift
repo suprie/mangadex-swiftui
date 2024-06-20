@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import cobaxcode
+@testable import MangaDex_SwiftUI
 
 struct MangaViewModelTest {
 

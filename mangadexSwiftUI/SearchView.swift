@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct SearchView: View {
     @ObservedObject var viewModel = MangaViewModel()
     @State private var searchText = ""
 
@@ -20,13 +20,15 @@ struct ContentView: View {
                     MangaRow(manga: manga)
                 }
                 .listStyle(.plain)
+                .navigationTitle(searchText)
+                .navigationBarTitleDisplayMode(.inline)
             }
         }
         .searchable(text: $searchText)
         .onSubmit(of: .search){
             viewModel.load(with: searchText)
         }
-        .navigationTitle("Manga")
+
     }
 }
 
@@ -42,10 +44,11 @@ struct MangaRow: View {
                 .font(.caption)
                 .fontWeight(.light)
                 .foregroundStyle(.gray)
-        }.padding(.bottom, 10)
+        }
+        .padding(.bottom, 10)
     }
 }
 
 #Preview {
-    ContentView()
+    SearchView()
 }

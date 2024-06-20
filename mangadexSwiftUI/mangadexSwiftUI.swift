@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct cobaxcodeApp: App {
+struct mangadexSwiftUI: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SearchView()
         }
     }
 }
