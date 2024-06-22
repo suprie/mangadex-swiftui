@@ -6,7 +6,7 @@
 //
 
 import Testing
-import XCTest
+
 @testable import MangaDex_SwiftUI
 
 @MainActor
@@ -16,6 +16,11 @@ struct MangaViewModelTest {
 
     @Test func load() async {
         await sut.load(with: "One")
-        #expect(sut.mangas.count > 0)
+
+        if case MangaViewModelState.loaded(let manga) = sut.state {
+            #expect(manga.count > 0)
+        } else {
+            #expect(Bool(false))
+        }
     }
 }

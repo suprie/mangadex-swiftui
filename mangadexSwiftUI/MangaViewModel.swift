@@ -38,15 +38,29 @@ struct Manga {
     }
 }
 
+enum MangaViewModelState {
+    case loading
+    case loaded([Manga])
+    case error(Error)
+    case none
+}
+
 @MainActor
 final class MangaViewModel: ObservableObject {
+    @Published var state: MangaViewModelState = .none
     @Published var mangas: [Manga] = []
 
     private var searchAPI = SearchMangaAPI()
 
     func load(with searchString: String) async {
+        state = .loading
         let manga = try? await self.loadManga(with: searchString)
+        state = .loaded(manga ?? [])
         self.mangas = manga ?? []
+    }
+
+    func printDebug(manga: Manga) {
+        print(manga)
     }
 
     private func loadManga(with title: String) async throws -> [Manga] {
